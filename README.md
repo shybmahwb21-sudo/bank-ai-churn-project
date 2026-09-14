@@ -1,147 +1,154 @@
-# Bank Customer Churn Intelligence System
+# Bank AI Churn & Retention Platform
 
-هذا المشروع يقدم لوحة Streamlit ثنائية اللغة (العربية/English) لتقدير مخاطر مغادرة عملاء البنك، مع تحليل فردي وجماعي ورسوم ومؤشرات أداء.
+An end-to-end machine-learning portfolio project for predicting bank customer
+churn and turning the prediction into an actionable retention workflow.
 
-## التشغيل داخل VS Code
+The project combines:
 
-1. افتح مجلد `Dr_Muhannad_AI_Project` في VS Code.
-2. افتح `Churn_Project_Final.ipynb`.
-3. اختر Python Kernel.
-4. استخدم **Run All** لتشغيل الخلايا بالترتيب.
-5. شغّل الواجهة من Terminal داخل مجلد المشروع:
+- A reproducible scikit-learn training pipeline.
+- A persisted Random Forest churn model.
+- A Streamlit decision-support application.
+- Individual and batch prediction workflows.
+- Early-warning queues, explainable drivers, and what-if scenarios.
+- A transparent retention Opportunity Engine.
+- A safe in-process demo bank integration with SQLite persistence.
 
-```powershell
-py -m streamlit run app.py
+> **Demo disclaimer:** This project uses an educational dataset and simulated
+> bank records. It does not connect to a real bank and its value-at-risk
+> figures are illustrative proxies, not financial forecasts.
+
+## Business Problem
+
+Customer churn is costly because a bank often has an opportunity to intervene
+before a customer leaves. A conventional classifier answers:
+
+> Which customers may leave?
+
+This project extends that answer into an operating workflow:
+
+> Which customers should a retention team contact first, why, and what
+> hypothetical action could be considered?
+
+## Results
+
+Three models were evaluated on a held-out test set:
+
+| Model | Accuracy | Precision | Recall | F1-score | ROC-AUC |
+|---|---:|---:|---:|---:|---:|
+| Random Forest | 0.8170 | 0.5380 | 0.7125 | 0.6131 | 0.8612 |
+| Decision Tree | 0.7615 | 0.4497 | 0.7690 | 0.5675 | 0.8398 |
+| Logistic Regression | 0.7135 | 0.3872 | 0.7002 | 0.4987 | 0.7772 |
+
+Random Forest was selected because it achieved the strongest F1-score and
+ROC-AUC in the project evaluation. Recall is especially relevant here because
+missing a customer who later churns can cause the bank to miss an intervention
+opportunity.
+
+## Application Workflow
+
+```text
+Customer data
+    -> churn probability
+    -> 0-100 risk score and risk band
+    -> prioritized early-warning queue
+    -> explainable retention action
 ```
 
-ثم افتح الرابط الذي يظهر، غالبًا `http://localhost:8501`.
+The main application areas are:
 
-### تشغيل الواجهة بنقرة واحدة
+- **Retention Command Center:** ranks opportunities using churn risk, a
+  clearly labelled demo relationship-value proxy, and intervention signals.
+- **Executive Overview:** summarizes the portfolio and key churn patterns.
+- **Bank Sync:** runs a safe in-process mock synchronization and stores local
+  snapshots.
+- **Early Warning:** filters the prioritized queue by risk band and score.
+- **Customer Profile:** shows an individual prediction, drivers, action, and
+  a what-if scenario.
+- **Advanced Tools:** individual and batch prediction, data quality, model
+  performance, explainability, analytics, audit, and integration demos.
 
-بعد تثبيت المتطلبات، اضغط مرتين على الملف:
+## Quick Start
 
-`تشغيل_الواجهة.bat`
+### Option 1: One-click Windows launcher
 
-سيتم تشغيل الواجهة وفتحها على `http://localhost:8501`. إذا لم تكن المتطلبات
-مثبتة، شغّل الأمر التالي مرة واحدة من Terminal داخل مجلد المشروع:
+1. Install Python 3.10 or newer.
+2. Double-click `تشغيل_الواجهة.bat`.
+3. The launcher installs `requirements.txt` and starts Streamlit.
+4. Open `http://localhost:8501` if the browser does not open automatically.
+
+### Option 2: Terminal
 
 ```powershell
 py -m pip install -r requirements.txt
+py -m streamlit run app.py
 ```
 
-## محتويات المشروع
-
-| الملف | الوظيفة |
-|---|---|
-| `Churn_Project_Final.ipynb` | المشروع كاملًا خلية بخليه: اكتشاف، تقسيم، معالجة، تدريب، تقييم وتحليل. |
-| `data/Churn_Modelling.csv` | البيانات الأصلية. |
-| `best_model.joblib` | النموذج الأفضل المحفوظ بعد التدريب. |
-| `app.py` | واجهة التنبؤ. |
-| `src/opportunity.py` | Opportunity Engine: explainable scoring and demo campaign arithmetic. |
-| `train_final.py` | إعادة تدريب النموذج وتحديث ملفه. |
-| `outputs/metrics.json` | نتائج المقارنة. |
-
-## التدريب والتقييم
+## Reproduce Training
 
 ```powershell
 py train_final.py
 ```
 
-يستخدم التدريب تقسيمًا طبقيًا إلى تدريب/تحقق/اختبار، و`class_weight="balanced"` لمعالجة عدم توازن المغادرة. تُختار عتبة القرار التي تزيد F1 على مجموعة التحقق فقط (ولا تُستخدم مجموعة الاختبار في الاختيار)، ثم يُعاد تدريب النموذج الأفضل على بيانات التدريب. تُحفظ العتبة والمنهج ومقاييس الاختبار في `outputs/metrics.json` وتستخدمها الواجهة تلقائيًا.
+The final training script:
 
-## ملاحظة مهمة
+1. Removes identifier-only columns.
+2. Performs stratified train/test and train/validation splits.
+3. Scales numerical features and one-hot encodes categorical features.
+4. Trains Logistic Regression, Decision Tree, and Random Forest pipelines.
+5. Selects the decision threshold on validation data using F1-score.
+6. Evaluates on the untouched test set.
+7. Saves `best_model.joblib` and `outputs/metrics.json`.
 
-ملف `best_model.joblib` ملف ثنائي، لذلك لا يُفتح كنص. إذا ظهر في الواجهة احتمال تنبؤ، فهذا يعني أنه محفوظ ويعمل.
-
-## Bank AI Early Warning & Retention Platform
-
-The Streamlit app presents one clear operating flow:
-**bank customer data → AI churn probability → 0–100 risk score → retention
-action**. The primary navigation is intentionally limited to five sections:
-
-- **Executive Overview**: demo flow, portfolio KPIs, and the main sync CTA.
-- **Bank Sync**: run the safe in-process mock sync and inspect its result.
-- **Early Warning**: filter the prioritized queue by risk band and score.
-- **Customer Profile**: inspect a customer’s probability, drivers, action, and
-  what-if scenario.
-- **Advanced Tools**: the existing Individual, Batch, Data quality, Model
-  performance, Analytics, Model Arena, Explainable AI, audit, settings, and
-  integration pages remain available in the secondary selector.
-
-The interface is presentation-ready in both light and dark Streamlit themes.
-Demo Mode uses sample records only; it does not make real-bank claims or
-require credentials.
-
-## Innovation: Bank AI Retention Opportunity Engine
-
-The primary product is now the **Retention Command Center**, not a churn
-dashboard. It turns the persisted churn signal into an explainable opportunity
-score:
-
-**opportunity = churn risk × demo relationship-value proxy × intervention
-opportunity**.
-
-The weights are configurable in the UI and every score exposes its three
-components, priority tier (P1–P4), segment, and recommended playbook. The
-command center includes a top-10 next-action queue, segment opportunity chart,
-and a campaign simulator. The simulator accepts an intervention cost and an
-expected save-rate assumption and reports scenario arithmetic only. “Estimated
-portfolio value at risk” uses the demo dataset's churn probability multiplied
-by a clearly labelled balance/salary relationship-value proxy; it is **not**
-real bank revenue, a financial forecast, or a claim about a financial
-institution.
-
-### Academic demo pitch
-
-“A conventional model tells a bank who may leave. Bank AI Retention
-Opportunity Engine answers the harder operating question: where should a team
-start, why there, and what could an assumed intervention look like? In one
-screen, an audience can change the priorities, inspect the transparent
-trade-offs, choose a playbook, and test a hypothetical campaign—without
-changing the underlying ML result or implying access to real bank data.”
-
-Opportunity fields are additive to predictor responses and batch outputs; the
-original probability, threshold, risk bands, reports, and analyst tools remain
-available unchanged.
-
-### Academic Demo Mode Bank AI Integration Center
-
-تتضمن الواجهة الآن طبقة تكامل مستقلة وقابلة للاختبار داخل `src/` مع Demo Mode
-آمن افتراضياً. لا يحتاج Demo Mode إلى مفاتيح أو خدمة خارجية، ويستخدم
-`MockBankClient` داخل العملية. تُحفظ العملاء والتنبؤات وعمليات المزامنة وسجل
-التدقيق في SQLite (`outputs/bank_ai.sqlite3`). انسخ `.env.example` إلى `.env`
-لتغيير المسارات محلياً؛ لا تضع أسراراً في المستودع.
-
-تظل أدوات AI Prediction وBank Integration وSynchronization وWhat-if وAnalytics
-وModel Arena وExplainable AI وSecurity & Audit وSettings/Demo Mode، إضافة إلى
-صفحات Individual وBatch وData quality وتقارير CSV/PDF، متاحة من Advanced Tools.
-مستويات الخطر قابلة للتعديل:
-0–24 LOW، 25–49 MEDIUM، 50–74 HIGH، 75–100 CRITICAL.
-
-### API الاختياري
-
-إذا كانت FastAPI مثبتة، يمكن تشغيل محول الـAPI من Python:
-
-```python
-from src.mock_api import create_app
-app = create_app()
-```
-
-يوفر `/api/customers` و`/api/customers/{id}` و`POST /api/customers` و`POST
-/api/sync` و`/api/health` و`/api/statistics` و`POST /api/webhook`. عدم تثبيت
-FastAPI لا يؤثر على Streamlit Demo Mode.
-
-### الاختبارات والتحقق
+## Validation
 
 ```powershell
 py -m unittest discover -s tests -v
 py -m py_compile app.py train_final.py src\*.py tests\*.py
 ```
 
-يعرض Model Arena المقاييس الموجودة فعلياً في `outputs/metrics.json` دون اختلاق
-مؤشرات. النموذج محفوظ ومحمّل مرة واحدة لكل مسار، وتعرض Explainable AI أهمية
-الخصائص المستخرجة من pipeline.
+## Repository Structure
 
-## المنهج
+| Path | Purpose |
+|---|---|
+| `app.py` | Streamlit application and user workflows |
+| `train_final.py` | Reproducible model training and evaluation |
+| `Churn_Project_Final.ipynb` | Exploratory analysis and model comparison |
+| `best_model.joblib` | Persisted production-style model pipeline |
+| `data/` | Educational churn dataset |
+| `src/` | Prediction, sync, persistence, reporting, audit, and scoring services |
+| `outputs/metrics.json` | Evaluation metadata and saved model results |
+| `tests/` | Automated project tests |
+| `requirements.txt` | Python dependencies |
+| `تشغيل_الواجهة.bat` | Windows one-click launcher |
 
-المشروع يتبع الترتيب: **Data Discovery → Stratified Train/Validation/Test Split → Preprocessing → Imbalance-aware Model Training → Validation Threshold Selection → Evaluation → Business Analysis → Prediction**. تمت مقارنة Logistic Regression وDecision Tree وRandom Forest، واختيار النموذج الأفضل حسب F1-score على الاختبار باستخدام عتبة اختيرت مسبقًا من التحقق.
+## Technical Highlights
+
+- Prevents preprocessing mismatch by keeping transformations and estimators
+  in a single scikit-learn `Pipeline`.
+- Uses `class_weight="balanced"` to address the imbalanced churn target.
+- Separates validation threshold selection from final test evaluation.
+- Supports CSV batch scoring and downloadable CSV/PDF reports.
+- Exposes feature importance and model drivers for explainability.
+- Uses SQLite and a mock client to demonstrate integration without credentials.
+- Treats Opportunity Engine calculations as transparent scenarios rather than
+  unsupported financial claims.
+
+## Portfolio Summary
+
+This project demonstrates practical skills in:
+
+- Python, Pandas, scikit-learn, and model evaluation.
+- Classification under class imbalance.
+- Feature preprocessing and reproducible pipelines.
+- Streamlit product development.
+- Explainable decision support.
+- Batch inference and report generation.
+- Lightweight persistence, audit logging, and service integration.
+
+## Suggested Resume Description
+
+> Built an end-to-end bank customer churn and retention platform using
+> Python, scikit-learn, and Streamlit; compared three classifiers, selected a
+> Random Forest using F1/ROC-AUC, implemented validation-based thresholding,
+> and delivered explainable early-warning and retention workflows with batch
+> scoring, what-if analysis, and a simulated bank integration layer.

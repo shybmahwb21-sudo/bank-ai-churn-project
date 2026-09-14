@@ -1,0 +1,48 @@
+{
+  "best_model": "Random Forest",
+  "decision_threshold": 0.55,
+  "threshold_selection": "validation F1 (20% of training split; test untouched)",
+  "class_weight": "balanced",
+  "test_size": 0.2,
+  "validation_size_of_train": 0.2,
+  "positive_label": "Exited=1",
+  "results": [
+    {
+      "Model": "Random Forest",
+      "Threshold": 0.55,
+      "Accuracy": 0.8375,
+      "Precision": 0.5957943925233645,
+      "Recall": 0.6265356265356266,
+      "F1-score": 0.6107784431137725,
+      "ROC-AUC": 0.8593107745650119
+    },
+    {
+      "Model": "Decision Tree",
+      "Threshold": 0.61,
+      "Accuracy": 0.831,
+      "Precision": 0.5804195804195804,
+      "Recall": 0.6117936117936118,
+      "F1-score": 0.5956937799043063,
+      "ROC-AUC": 0.84390014051031
+    },
+    {
+      "Model": "Logistic Regression",
+      "Threshold": 0.605,
+      "Accuracy": 0.777,
+      "Precision": 0.45979381443298967,
+      "Recall": 0.547911547911548,
+      "F1-score": 0.5,
+      "ROC-AUC": 0.7777068285542861
+    }
+  ],
+  "test_confusion_matrix": [
+    [
+      1411,
+      182
+    ],
+    [
+      141,
+      266
+    ]
+  ]
+}
